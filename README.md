@@ -30,25 +30,25 @@ The API will be available at `http://localhost:8010`
 
 #### Option 1: Use Pre-built Image from Docker Hub
 ```bash
-docker pull yourusername/il-emotion-and-sentiment-analyser:latest
-docker run -p 8010:8010 yourusername/il-emotion-and-sentiment-analyser:latest
+docker pull johnserv/sentimotion:latest
+docker run -p 8010:8010 johnserv/sentimotion:latest
 ```
 
 #### Option 2: Build Locally
 1. Build the image:
 ```bash
-docker build -t il-emotion-and-sentiment-analyser .
+docker build -t sentimotion .
 ```
 
 2. Run the container:
 ```bash
-docker run -p 8010:8010 il-emotion-and-sentiment-analyser
+docker run -p 8010:8010 sentimotion
 ```
 
 #### Automated Deployment
 This project automatically builds and pushes Docker images to Docker Hub on every push to the main branch using GitHub Actions. Images are available at:
-- `yourusername/il-emotion-and-sentiment-analyser:latest` (latest main branch)
-- `yourusername/il-emotion-and-sentiment-analyser:main-<commit-sha>` (specific commits)
+- `johnserv/sentimotion:latest` (latest main branch)
+- `johnserv/sentimotion:main-<commit-sha>` (specific commits)
 
 ## API Endpoints
 
