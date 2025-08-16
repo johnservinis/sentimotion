@@ -1,4 +1,4 @@
-# PulseChamp Emotion & Sentiment Analyzer
+# Emotion & Sentiment Analyzer
 
 A FastAPI microservice that provides emotion analysis and sentiment analysis for text inputs using state-of-the-art Hugging Face models.
 
@@ -24,19 +24,31 @@ pip install -r requirements.txt
 python main.py
 ```
 
-The API will be available at `http://localhost:8000`
+The API will be available at `http://localhost:8010`
 
 ### Docker
 
+#### Option 1: Use Pre-built Image from Docker Hub
+```bash
+docker pull yourusername/il-emotion-and-sentiment-analyser:latest
+docker run -p 8010:8010 yourusername/il-emotion-and-sentiment-analyser:latest
+```
+
+#### Option 2: Build Locally
 1. Build the image:
 ```bash
-docker build -t pulsechamp-analyzer .
+docker build -t il-emotion-and-sentiment-analyser .
 ```
 
 2. Run the container:
 ```bash
-docker run -p 8000:8000 pulsechamp-analyzer
+docker run -p 8010:8010 il-emotion-and-sentiment-analyser
 ```
+
+#### Automated Deployment
+This project automatically builds and pushes Docker images to Docker Hub on every push to the main branch using GitHub Actions. Images are available at:
+- `yourusername/il-emotion-and-sentiment-analyser:latest` (latest main branch)
+- `yourusername/il-emotion-and-sentiment-analyser:main-<commit-sha>` (specific commits)
 
 ## API Endpoints
 
@@ -136,8 +148,8 @@ Response:
 ## Interactive API Documentation
 
 Once the service is running, visit:
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
+- Swagger UI: `http://localhost:8010/docs`
+- ReDoc: `http://localhost:8010/redoc`
 
 ## Models Used
 

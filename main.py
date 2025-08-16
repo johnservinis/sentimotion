@@ -6,7 +6,7 @@ from models.sentiment_analyzer import SentimentAnalyzer
 
 
 app = FastAPI(
-    title="PulseChamp Emotion & Sentiment Analyzer",
+    title="Emotion & Sentiment Analyzer",
     description="Microservice for analyzing emotions and sentiment in text",
     version="1.0.0"
 )
@@ -32,7 +32,6 @@ class SentimentResponse(BaseModel):
 
 
 class CombinedResponse(BaseModel):
-    text: str
     emotions: dict
     sentiment: dict
     telemetry: dict
@@ -92,7 +91,6 @@ async def analyze_combined(input_data: TextInput):
         total_time = round((time.time() - start_time) * 1000, 2)
         
         return CombinedResponse(
-            text=input_data.text,
             emotions=emotion_result["emotions"],
             sentiment=sentiment_result["sentiment"],
             telemetry={
@@ -107,4 +105,4 @@ async def analyze_combined(input_data: TextInput):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8010)
