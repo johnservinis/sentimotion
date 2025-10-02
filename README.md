@@ -50,6 +50,72 @@ This project automatically builds and pushes Docker images to Docker Hub on ever
 - `johnserv/sentimotion:latest` (latest main branch)
 - `johnserv/sentimotion:main-<commit-sha>` (specific commits)
 
+## Production Deployment (Google Cloud Run)
+
+### Quick Deploy
+For production deployment with auto-scaling and cost optimization:
+
+```bash
+# Deploy directly to Cloud Run
+gcloud run deploy sentimotion \
+  --source . \
+  --region us-central1 \
+  --allow-unauthenticated \
+  --memory 4Gi \
+  --cpu 2 \
+  --max-instances 100
+```
+
+### GitHub Actions Deployment
+Automated deployment to Cloud Run is configured via GitHub Actions. To set up:
+
+1. **Create Google Cloud Project**
+   ```bash
+   gcloud projects create your-project-id
+   gcloud config set project your-project-id
+   ```
+
+2. **Enable Required APIs**
+   ```bash
+   gcloud services enable cloudbuild.googleapis.com
+   gcloud services enable run.googleapis.com
+   gcloud services enable containerregistry.googleapis.com
+   ```
+
+3. **Create Service Account**
+   ```bash
+   gcloud iam service-accounts create github-actions \
+     --display-name="GitHub Actions"
+   
+   gcloud projects add-iam-policy-binding your-project-id \
+     --member="serviceAccount:github-actions@your-project-id.iam.gserviceaccount.com" \
+     --role="roles/run.admin"
+   
+   gcloud projects add-iam-policy-binding your-project-id \
+     --member="serviceAccount:github-actions@your-project-id.iam.gserviceaccount.com" \
+     --role="roles/storage.admin"
+   
+   gcloud iam service-accounts keys create key.json \
+     --iam-account=github-actions@your-project-id.iam.gserviceaccount.com
+   ```
+
+4. **Configure GitHub Secrets**
+   - `GCP_PROJECT_ID`: Your Google Cloud project ID
+   - `GCP_SA_KEY`: Contents of the `key.json` file
+
+### Production Features
+- **Auto-scaling**: 0-100 instances based on demand
+- **Cost optimization**: Scales to zero when idle
+- **Health checks**: Enhanced monitoring and readiness checks
+- **Graceful shutdown**: Proper signal handling for zero-downtime deployments
+- **Logging**: Structured logging for production monitoring
+
+### Expected Costs
+- **Light usage** (1K requests/day): ~$5-10/month
+- **Medium usage** (10K requests/day): ~$20-40/month  
+- **Heavy usage** (100K requests/day): ~$100-200/month
+- **Peak handling**: Automatically scales to handle traffic spikes up to 1000 concurrent requests
+
 ## API Endpoints
 
 ### Health Check

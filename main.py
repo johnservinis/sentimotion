@@ -1,18 +1,48 @@
 import time
+import os
+import signal
+import logging
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from models.emotion_analyzer import EmotionAnalyzer
 from models.sentiment_analyzer import SentimentAnalyzer
 
 
+# Configure logging for production
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# Global analyzers
+emotion_analyzer = None
+sentiment_analyzer = None
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    global emotion_analyzer, sentiment_analyzer
+    logger.info("Loading ML models...")
+    
+    emotion_analyzer = EmotionAnalyzer()
+    sentiment_analyzer = SentimentAnalyzer()
+    
+    await emotion_analyzer.load_model()
+    await sentiment_analyzer.load_model()
+    
+    logger.info("ML models loaded successfully")
+    yield
+    # Shutdown
+    logger.info("Shutting down gracefully")
+
 app = FastAPI(
     title="Emotion & Sentiment Analyzer",
     description="Microservice for analyzing emotions and sentiment in text",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
-
-emotion_analyzer = EmotionAnalyzer()
-sentiment_analyzer = SentimentAnalyzer()
 
 
 class TextInput(BaseModel):
@@ -37,15 +67,18 @@ class CombinedResponse(BaseModel):
     telemetry: dict
 
 
-@app.on_event("startup")
-async def startup_event():
-    await emotion_analyzer.load_model()
-    await sentiment_analyzer.load_model()
 
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "service": "emotion-sentiment-analyzer"}
+    # Enhanced health check for Cloud Run
+    models_loaded = emotion_analyzer is not None and sentiment_analyzer is not None
+    return {
+        "status": "healthy" if models_loaded else "loading",
+        "service": "emotion-sentiment-analyzer",
+        "models_loaded": models_loaded,
+        "version": "1.0.0"
+    }
 
 
 @app.post("/emotion", response_model=EmotionResponse)
@@ -103,6 +136,21 @@ async def analyze_combined(input_data: TextInput):
         raise HTTPException(status_code=500, detail=f"Error in combined analysis: {str(e)}")
 
 
+# Graceful shutdown handler
+def signal_handler(signum, frame):
+    logger.info(f"Received signal {signum}, shutting down gracefully...")
+    exit(0)
+
+signal.signal(signal.SIGTERM, signal_handler)
+signal.signal(signal.SIGINT, signal_handler)
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8010)
+    port = int(os.getenv("PORT", 8010))
+    uvicorn.run(
+        app, 
+        host="0.0.0.0", 
+        port=port,
+        access_log=True,
+        log_level="info"
+    )
