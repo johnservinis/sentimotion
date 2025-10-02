@@ -30,8 +30,7 @@ steps:
       '--max-instances', '100',
       '--min-instances', '0',
       '--port', '8010',
-      '--timeout', '300',
-      '--set-env-vars', 'PORT=8010'
+      '--timeout', '300'
     ]
 
 # Store images in Container Registry
