@@ -5,8 +5,13 @@ import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from dotenv import load_dotenv
 from models.emotion_analyzer import EmotionAnalyzer
 from models.sentiment_analyzer import SentimentAnalyzer
+from middleware.auth import APIKeyMiddleware
+
+# Load environment variables from .env file (for local development)
+load_dotenv()
 
 
 # Configure logging for production
@@ -43,6 +48,9 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+# Add authentication middleware
+app.add_middleware(APIKeyMiddleware)
 
 
 class TextInput(BaseModel):

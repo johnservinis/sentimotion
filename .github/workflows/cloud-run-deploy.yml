@@ -53,7 +53,7 @@ jobs:
           --min-instances 0 \
           --port 8010 \
           --timeout 300 \
-          --set-env-vars PORT=8010
+          --set-env-vars PORT=8010,API_KEYS=${{ secrets.API_KEYS }}
 
     - name: Show service URL
       run: |
